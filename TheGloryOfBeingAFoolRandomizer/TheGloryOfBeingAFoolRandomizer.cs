@@ -7,12 +7,11 @@ using RCLogic = RandomizerCore.Logic;
 using RCLogicItems = RandomizerCore.LogicItems;
 using RandoRC = RandomizerMod.RC;
 using RandoSettings = RandomizerMod.Settings;
+using RandoLogging = RandomizerMod.Logging;
 using RandoMenu = RandomizerMod.Menu;
 using RandoData = RandomizerMod.RandomizerData;
 using MC = MenuChanger;
 using MCMenuElements = MenuChanger.MenuElements;
-
-using RandoLogging = RandomizerMod.Logging;
 
 namespace TheGloryOfBeingAFoolRandomizer
 {
@@ -20,23 +19,30 @@ namespace TheGloryOfBeingAFoolRandomizer
     {
         public override string GetVersion() => "1.0";
 
+        private const string Colosseum3LocationName = "Glory_of_Being_a_Fool-Colosseum";
+
         public override void Initialize()
         {
             IC.Finder.DefineCustomItem(new TheGloryOfBeingAFool());
             IC.Finder.DefineCustomLocation(new ICSpecLoc.ColosseumLocation()
             {
                 name = Colosseum3LocationName,
-                sceneName = IC.SceneNames.Room_Colosseum_Gold
+                sceneName = IC.SceneNames.Room_Colosseum_Gold,
+                objectName = "Shiny Item",
+                fsmParent = "Colosseum Manager",
+                fsmName = "Geo Pool",
+                fsmVariable = "Shiny Obj",
+                flingType = IC.FlingType.Everywhere
             });
 
             RandoRC.RequestBuilder.OnUpdate.Subscribe(50, AddGloryToPool);
+            // missing: follow Colosseum Previews setting
             RandoRC.RCData.RuntimeLogicOverride.Subscribe(50, HookLogic);
 
             RandoMenu.RandomizerMenuAPI.AddMenuPage(_ => {}, BuildConnectionMenuButton);
+            // missing: RSM integration
             RandoLogging.SettingsLog.AfterLogSettings += LogRandoSettings;
         }
-
-        private const string Colosseum3LocationName = "Glory_of_Being_a_Fool-Colosseum";
 
         private ModSettings settings = new();
 
