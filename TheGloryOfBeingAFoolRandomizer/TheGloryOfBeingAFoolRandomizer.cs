@@ -1,4 +1,7 @@
 using IO = System.IO;
+using Collections = System.Collections.Generic;
+using PMActions = HutongGames.PlayMaker.Actions;
+using UE = UnityEngine;
 using MAPI = Modding;
 using IC = ItemChanger;
 using ICSpecLoc = ItemChanger.Locations.SpecialLocations;
@@ -21,8 +24,17 @@ namespace TheGloryOfBeingAFoolRandomizer
 
         private const string Colosseum3LocationName = "Glory_of_Being_a_Fool-Colosseum";
 
-        public override void Initialize()
+        public override Collections.List<(string, string)> GetPreloadNames() => new()
         {
+            (IC.SceneNames.Room_Colosseum_Spectate, "Crowd Audio")
+        };
+
+        public override void Initialize(Collections.Dictionary<string, Collections.Dictionary<string, UE.GameObject>> preloads)
+        {
+            TheGloryOfBeingAFool.Cheer = (UE.AudioClip)preloads[IC.SceneNames.Room_Colosseum_Spectate]["Crowd Audio"].LocateMyFSM("Control")
+                .FsmStates.FirstOrDefault(s => s.Name == "Cheer")
+                .Actions.OfType<PMActions.AudioPlayerOneShotSingle>().FirstOrDefault()
+                .audioClip.Value;
             IC.Finder.DefineCustomItem(new TheGloryOfBeingAFool());
             IC.Finder.DefineCustomLocation(new ICSpecLoc.ColosseumLocation()
             {
