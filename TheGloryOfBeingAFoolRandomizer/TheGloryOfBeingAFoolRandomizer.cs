@@ -54,7 +54,13 @@ namespace TheGloryOfBeingAFoolRandomizer
 
             RandoMenu.RandomizerMenuAPI.AddMenuPage(_ => {}, BuildConnectionMenuButton);
             // missing: RSM integration
+            // missing: location pin for Rando Map
             RandoLogging.SettingsLog.AfterLogSettings += LogRandoSettings;
+
+            if (MAPI.ModHooks.GetMod("RandoSettingsManager") != null)
+            {
+                HookRSM();
+            }
         }
 
         private ModSettings settings = new();
@@ -122,6 +128,17 @@ namespace TheGloryOfBeingAFoolRandomizer
         {
             w.WriteLine("Logging TheGloryOfBeingAFoolRandomizer settings:");
             w.WriteLine(RandoData.JsonUtil.Serialize(settings));
+        }
+
+        private void HookRSM()
+        {
+            RandoSettingsManager.RandoSettingsManagerMod.Instance.RegisterConnection(
+                new RandoSettingsManagerProxy()
+                {
+                    getter = () => settings,
+                    setter = rs => settings = rs
+                }
+            );
         }
     }
 }
