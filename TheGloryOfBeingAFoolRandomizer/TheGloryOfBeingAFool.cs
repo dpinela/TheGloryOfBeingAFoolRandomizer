@@ -13,8 +13,8 @@ namespace TheGloryOfBeingAFoolRandomizer
             UIDef = new ICUIDefs.MsgUIDef()
             {
                 name = new IC.BoxedString("The Glory of Being a Fool"),
-                shopDesc = new IC.BoxedString("???"),
-                sprite = new IC.ItemChangerSprite("ShopIcons.WanderersJournal")
+                shopDesc = new IC.BoxedString("Some bugs are so hungry for glory, any glory, that they would seek this trophy and wear it on their cloaks."),
+                sprite = new FoolSprite()
             };
         }
 
