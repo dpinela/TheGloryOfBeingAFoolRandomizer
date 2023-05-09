@@ -4,6 +4,7 @@ using PMActions = HutongGames.PlayMaker.Actions;
 using UE = UnityEngine;
 using MAPI = Modding;
 using IC = ItemChanger;
+using ICTags = ItemChanger.Tags;
 using ICSpecLoc = ItemChanger.Locations.SpecialLocations;
 using RC = RandomizerCore;
 using RCLogic = RandomizerCore.Logic;
@@ -47,8 +48,8 @@ namespace TheGloryOfBeingAFoolRandomizer
                 flingType = IC.FlingType.Everywhere
             });
 
-            RandoRC.RequestBuilder.OnUpdate.Subscribe(50, AddGloryToPool);
-            // missing: follow Colosseum Previews setting
+            RandoRC.RequestBuilder.OnUpdate.Subscribe(30, ApplyPreviewSetting);
+            RandoRC.RequestBuilder.OnUpdate.Subscribe(50, AddGloryToPool);            
             RandoRC.RCData.RuntimeLogicOverride.Subscribe(50, HookLogic);
 
             RandoMenu.RandomizerMenuAPI.AddMenuPage(_ => {}, BuildConnectionMenuButton);
@@ -71,6 +72,18 @@ namespace TheGloryOfBeingAFoolRandomizer
             {
                 rb.AddItemByName(TheGloryOfBeingAFool.Name);
                 rb.AddLocationByName(Colosseum3LocationName);
+            }
+        }
+
+        private void ApplyPreviewSetting(RandoRC.RequestBuilder rb)
+        {
+            if (settings.Enabled && !rb.gs.LongLocationSettings.ColosseumPreview)
+            {
+                rb.EditLocationRequest(Colosseum3LocationName, info =>
+                {
+                    info.onPlacementFetch += (_, _, placement) =>
+                        placement.GetOrAddTag<ICTags.DisableItemPreviewTag>();
+                });
             }
         }
 
