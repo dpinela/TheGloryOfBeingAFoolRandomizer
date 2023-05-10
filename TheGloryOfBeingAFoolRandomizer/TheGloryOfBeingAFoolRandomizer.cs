@@ -4,18 +4,11 @@ using PMActions = HutongGames.PlayMaker.Actions;
 using UE = UnityEngine;
 using MAPI = Modding;
 using IC = ItemChanger;
-using ICTags = ItemChanger.Tags;
 using ICSpecLoc = ItemChanger.Locations.SpecialLocations;
 using RC = RandomizerCore;
-using RCLogic = RandomizerCore.Logic;
-using RCLogicItems = RandomizerCore.LogicItems;
-using RandoRC = RandomizerMod.RC;
-using RandoSettings = RandomizerMod.Settings;
-using RandoLogging = RandomizerMod.Logging;
-using RandoMenu = RandomizerMod.Menu;
+using Rando = RandomizerMod;
 using RandoData = RandomizerMod.RandomizerData;
 using MC = MenuChanger;
-using MCMenuElements = MenuChanger.MenuElements;
 
 namespace TheGloryOfBeingAFoolRandomizer
 {
@@ -23,7 +16,7 @@ namespace TheGloryOfBeingAFoolRandomizer
     {
         public override string GetVersion() => "1.0";
 
-        private const string Colosseum3LocationName = "Glory_of_Being_a_Fool-Colosseum";
+        private const string Colosseum3LocationName = "The_Glory_of_Being_a_Fool-Colosseum";
 
         public override Collections.List<(string, string)> GetPreloadNames() => new()
         {
@@ -45,22 +38,34 @@ namespace TheGloryOfBeingAFoolRandomizer
                 fsmParent = "Colosseum Manager",
                 fsmName = "Geo Pool",
                 fsmVariable = "Shiny Obj",
-                flingType = IC.FlingType.Everywhere
+                flingType = IC.FlingType.Everywhere,
+                tags = new() { LocationMetadataTag() }
             });
 
-            RandoRC.RequestBuilder.OnUpdate.Subscribe(30, ApplyPreviewSetting);
-            RandoRC.RequestBuilder.OnUpdate.Subscribe(50, AddGloryToPool);            
-            RandoRC.RCData.RuntimeLogicOverride.Subscribe(50, HookLogic);
+            Rando.RC.RequestBuilder.OnUpdate.Subscribe(30, ApplyPreviewSetting);
+            Rando.RC.RequestBuilder.OnUpdate.Subscribe(50, AddGloryToPool);
+            Rando.RC.RCData.RuntimeLogicOverride.Subscribe(50, HookLogic);
 
-            RandoMenu.RandomizerMenuAPI.AddMenuPage(_ => {}, BuildConnectionMenuButton);
-            // missing: RSM integration
-            // missing: location pin for Rando Map
-            RandoLogging.SettingsLog.AfterLogSettings += LogRandoSettings;
+            Rando.Menu.RandomizerMenuAPI.AddMenuPage(_ => {}, BuildConnectionMenuButton);
+            Rando.Logging.SettingsLog.AfterLogSettings += LogRandoSettings;
 
             if (MAPI.ModHooks.GetMod("RandoSettingsManager") != null)
             {
                 HookRSM();
             }
+        }
+
+        private static IC.Tag LocationMetadataTag()
+        {
+            var t = new IC.Tags.InteropTag();
+            t.Message = "RandoSupplementalMetadata";
+            t.Properties["ModSource"] = nameof(TheGloryOfBeingAFoolRandomizer);
+            t.Properties["PinSpriteKey"] = "Lore";
+            t.Properties["MapLocations"] = new (string scene, float x, float y)[]
+            {
+                (IC.SceneNames.Deepnest_East_09, 2.7f, 0.0f)
+            };
+            return t;
         }
 
         private ModSettings settings = new();
@@ -72,7 +77,7 @@ namespace TheGloryOfBeingAFoolRandomizer
 
         public ModSettings OnSaveGlobal() => settings;
 
-        private void AddGloryToPool(RandoRC.RequestBuilder rb)
+        private void AddGloryToPool(Rando.RC.RequestBuilder rb)
         {
             if (settings.Enabled)
             {
@@ -81,33 +86,33 @@ namespace TheGloryOfBeingAFoolRandomizer
             }
         }
 
-        private void ApplyPreviewSetting(RandoRC.RequestBuilder rb)
+        private void ApplyPreviewSetting(Rando.RC.RequestBuilder rb)
         {
             if (settings.Enabled && !rb.gs.LongLocationSettings.ColosseumPreview)
             {
                 rb.EditLocationRequest(Colosseum3LocationName, info =>
                 {
                     info.onPlacementFetch += (_, _, placement) =>
-                        placement.GetOrAddTag<ICTags.DisableItemPreviewTag>();
+                        placement.GetOrAddTag<IC.Tags.DisableItemPreviewTag>();
                 });
             }
         }
 
-        private void HookLogic(RandoSettings.GenerationSettings gs, RCLogic.LogicManagerBuilder lmb)
+        private void HookLogic(Rando.Settings.GenerationSettings gs, RC.Logic.LogicManagerBuilder lmb)
         {
             if (settings.Enabled)
             {
                 var term = lmb.GetOrAddTerm(TheGloryOfBeingAFool.Name);
                 lmb.AddItem(
-                    new RCLogicItems.SingleItem(TheGloryOfBeingAFool.Name,
+                    new RC.LogicItems.SingleItem(TheGloryOfBeingAFool.Name,
                     new(term, 1)));
                 lmb.LogicLookup[Colosseum3LocationName] = lmb.LogicLookup[IC.LocationNames.Pale_Ore_Colosseum];
             }
         }
 
-        private bool BuildConnectionMenuButton(MC.MenuPage landingPage, out MCMenuElements.SmallButton settingsButton)
+        private bool BuildConnectionMenuButton(MC.MenuPage landingPage, out MC.MenuElements.SmallButton settingsButton)
         {
-            var button = new MCMenuElements.SmallButton(landingPage, "T.G.O.B.A.F. Rando");
+            var button = new MC.MenuElements.SmallButton(landingPage, "T.G.O.B.A.F. Rando");
 
             void UpdateButtonColor()
             {
@@ -124,7 +129,7 @@ namespace TheGloryOfBeingAFoolRandomizer
             return true;
         }
 
-        private void LogRandoSettings(RandoLogging.LogArguments args, IO.TextWriter w)
+        private void LogRandoSettings(Rando.Logging.LogArguments args, IO.TextWriter w)
         {
             w.WriteLine("Logging TheGloryOfBeingAFoolRandomizer settings:");
             w.WriteLine(RandoData.JsonUtil.Serialize(settings));
