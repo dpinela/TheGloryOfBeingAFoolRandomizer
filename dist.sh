@@ -1,0 +1,2 @@
+#!/bin/sh
+zip -j TheGloryOfBeingAFoolRandomizer.zip TheGloryOfBeingAFoolRandomizer/Resources/*.png TheGloryOfBeingAFoolRandomizer/bin/Debug/TheGloryOfBeingAFoolRandomizer.dll TheGloryOfBeingAFoolRandomizer/bin/Debug/TheGloryOfBeingAFoolRandomizer.pdb
