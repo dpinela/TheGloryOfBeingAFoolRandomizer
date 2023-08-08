@@ -1,12 +1,13 @@
 using IO = System.IO;
 using IC = ItemChanger;
+using NJ = Newtonsoft.Json;
 using UE = UnityEngine;
 
 namespace TheGloryOfBeingAFoolRandomizer
 {
     internal class FoolSprite : IC.ISprite
     {
-        public UE.Sprite Value => LoadSprite(ref sprite, "fool.png");
+        [NJ.JsonIgnore] public UE.Sprite Value => LoadSprite(ref sprite, "fool.png");
         public IC.ISprite Clone() => (IC.ISprite)MemberwiseClone();
 
         private static UE.Sprite sprite;
