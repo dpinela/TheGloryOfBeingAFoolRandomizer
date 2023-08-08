@@ -14,7 +14,7 @@ namespace TheGloryOfBeingAFoolRandomizer
 {
     public class TheGloryOfBeingAFoolRandomizer : MAPI.Mod, MAPI.IGlobalSettings<ModSettings>
     {
-        public override string GetVersion() => "1.0";
+        public override string GetVersion() => "1.0.1";
 
         private const string Colosseum3LocationName = "The_Glory_of_Being_a_Fool-Colosseum";
 
