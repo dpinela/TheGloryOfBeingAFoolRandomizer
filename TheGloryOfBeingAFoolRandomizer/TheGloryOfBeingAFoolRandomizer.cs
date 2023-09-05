@@ -14,7 +14,7 @@ namespace TheGloryOfBeingAFoolRandomizer
 {
     public class TheGloryOfBeingAFoolRandomizer : MAPI.Mod, MAPI.IGlobalSettings<ModSettings>
     {
-        public override string GetVersion() => "1.0.1";
+        public override string GetVersion() => "1.0.2";
 
         private const string Colosseum3LocationName = "The_Glory_of_Being_a_Fool-Colosseum";
 
@@ -42,7 +42,7 @@ namespace TheGloryOfBeingAFoolRandomizer
                 tags = new() { LocationMetadataTag() }
             });
 
-            Rando.RC.RequestBuilder.OnUpdate.Subscribe(30, ApplyPreviewSetting);
+            Rando.RC.RequestBuilder.OnUpdate.Subscribe(30, ApplyLocationSettings);
             Rando.RC.RequestBuilder.OnUpdate.Subscribe(50, AddGloryToPool);
             Rando.RC.RCData.RuntimeLogicOverride.Subscribe(50, HookLogic);
 
@@ -86,14 +86,28 @@ namespace TheGloryOfBeingAFoolRandomizer
             }
         }
 
-        private void ApplyPreviewSetting(Rando.RC.RequestBuilder rb)
+        private void ApplyLocationSettings(Rando.RC.RequestBuilder rb)
         {
-            if (settings.Enabled && !rb.gs.LongLocationSettings.ColosseumPreview)
+            if (settings.Enabled)
             {
                 rb.EditLocationRequest(Colosseum3LocationName, info =>
                 {
-                    info.onPlacementFetch += (_, _, placement) =>
-                        placement.GetOrAddTag<IC.Tags.DisableItemPreviewTag>();
+                    // Rando itself doesn't strictly require this,
+                    // but at least MajorItemByAreaTracker needs the
+                    // MapArea to be defined (which by default is deduced
+                    // from the SceneName)
+                    info.getLocationDef = () => new()
+                    {
+                        Name = Colosseum3LocationName,
+                        SceneName = IC.SceneNames.Room_Colosseum_01,
+                        FlexibleCount = false,
+                        AdditionalProgressionPenalty = false
+                    };
+                    if (!rb.gs.LongLocationSettings.ColosseumPreview)
+                    {
+                        info.onPlacementFetch += (_, _, placement) =>
+                            placement.GetOrAddTag<IC.Tags.DisableItemPreviewTag>();
+                    }
                 });
             }
         }
